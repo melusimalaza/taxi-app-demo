@@ -3,6 +3,10 @@
 No backend, no database, no real auth — everything is mocked and lives in
 your browser. Built from `taxi_app_prototype_spec.md` (Nadia's spec).
 
+**Live demo:** https://melusimalaza.github.io/taxi-app-demo/ — works on any
+phone or laptop, no local setup needed. Open the Passenger and Driver links
+on two devices (or two tabs) to test the full flow.
+
 ## Run it
 
 Any static file server works. Easiest options:
