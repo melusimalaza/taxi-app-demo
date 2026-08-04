@@ -45,9 +45,12 @@
         </select>
         <p class="field-hint" id="new-driver-route-info">Pick a route to see its stops on the map.</p>
 
-        <label>2. Tap the map to set your current location</label>
+        <label>2. Your current location</label>
+        <div class="locate-row">
+          <button class="secondary" id="btn-new-driver-locate" type="button">📍 Use my location</button>
+          <p class="field-hint" id="new-driver-location-info" style="margin:0">Tap "Use my location" or tap the map to set it manually.</p>
+        </div>
         <div id="new-driver-map" style="height:260px;border-radius:12px;border:1px solid var(--border)"></div>
-        <p class="field-hint" id="new-driver-location-info">No location set yet.</p>
       </div>
 
       <button id="btn-login" disabled>Continue</button>
@@ -89,6 +92,7 @@
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>
   <script src="js/map-utils.js"></script>
+  <script src="js/notify.js"></script>
   <script src="js/driver.js"></script>
 </body>
 </html>

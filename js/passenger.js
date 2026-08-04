@@ -44,7 +44,32 @@
     initMap();
     populateRoutes();
     refreshRequestBlocker();
+    Notify.requestPermission();
+    requestGeolocation(true);
   });
+
+  // ---------- Geolocation ----------
+  function requestGeolocation(silent) {
+    const info = document.getElementById('location-info');
+    if (!('geolocation' in navigator)) {
+      info.textContent = 'Location services aren’t available on this device — tap the map to set your location manually.';
+      return;
+    }
+    info.innerHTML = '<span class="locate-spinner"></span>Finding your location…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPassengerLocation(pos.coords.latitude, pos.coords.longitude);
+        if (map) map.setView([pos.coords.latitude, pos.coords.longitude], 14);
+      },
+      (err) => {
+        info.textContent = silent
+          ? 'Location access not granted — using Johannesburg CBD as a default. Tap the map or "Use my location" to set it.'
+          : `Couldn't get your location (${err.message}). Tap the map to set it manually.`;
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+  document.getElementById('btn-locate').addEventListener('click', () => requestGeolocation(false));
 
   // ---------- STEP 2: location / route / stop ----------
   function initMap() {
@@ -230,6 +255,7 @@
     document.getElementById('status-detail').innerHTML =
       '<p>No online drivers on this route right now. Try again once a driver goes online.</p>';
     document.getElementById('btn-reset').style.display = 'inline-block';
+    Notify.fire('🚫 No drivers available', 'No online drivers on this route right now.', { kind: 'declined', sound: false });
   }
 
   // ---------- STEP 3: status / polling / forwarding ----------
@@ -290,6 +316,7 @@
 
     setStatusChip('declined', 'Declined — finding next match…');
     document.getElementById('status-detail').innerHTML = '<p>Looking for the next closest available driver…</p>';
+    Notify.fire('⏱️ Declined / timed out', 'Finding the next closest available driver…', { kind: 'declined' });
 
     setTimeout(() => {
       const state = loadState();
@@ -334,6 +361,7 @@
     document.getElementById('btn-reset').style.display = 'inline-block';
 
     if (animatingForRequestId === req.id) return; // already animating
+    Notify.fire('✅ Driver accepted!', `${driver.name} is on the way to ${stop.name} (~${etaMin} min).`, { kind: 'accepted', tag: req.id });
     animatingForRequestId = req.id;
     if (animCancel) animCancel();
 

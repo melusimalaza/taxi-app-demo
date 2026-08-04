@@ -56,25 +56,51 @@
       routeSel.addEventListener('change', onNewDriverRouteChange);
     }
     document.getElementById('new-driver-name').addEventListener('input', refreshLoginBlocker);
+    const locateBtn = document.getElementById('btn-new-driver-locate');
+    if (!locateBtn.dataset.wired) {
+      locateBtn.dataset.wired = '1';
+      locateBtn.addEventListener('click', requestNewDriverGeolocation);
+    }
     if (!newDriverMap) {
       newDriverMap = L.map('new-driver-map').setView([JHB_CENTER.lat, JHB_CENTER.lng], 10);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(newDriverMap);
-      newDriverMap.on('click', (e) => {
-        newDriverLocation = { lat: e.latlng.lat, lng: e.latlng.lng };
-        if (newDriverMapMarker) newDriverMap.removeLayer(newDriverMapMarker);
-        newDriverMapMarker = L.marker([e.latlng.lat, e.latlng.lng], { icon: ICONS.driverOffline() })
-          .addTo(newDriverMap)
-          .bindPopup('Your location')
-          .openPopup();
-        document.getElementById('new-driver-location-info').textContent =
-          `Location set (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}).`;
-        refreshLoginBlocker();
-      });
+      newDriverMap.on('click', (e) => setNewDriverLocation(e.latlng.lat, e.latlng.lng));
       setTimeout(() => newDriverMap.invalidateSize(), 200);
     }
+  }
+
+  function setNewDriverLocation(lat, lng) {
+    newDriverLocation = { lat, lng };
+    if (newDriverMapMarker) newDriverMap.removeLayer(newDriverMapMarker);
+    newDriverMapMarker = L.marker([lat, lng], { icon: ICONS.driverOffline() })
+      .addTo(newDriverMap)
+      .bindPopup('Your location')
+      .openPopup();
+    document.getElementById('new-driver-location-info').textContent =
+      `📍 Location set (${lat.toFixed(4)}, ${lng.toFixed(4)}).`;
+    refreshLoginBlocker();
+  }
+
+  function requestNewDriverGeolocation() {
+    const info = document.getElementById('new-driver-location-info');
+    if (!('geolocation' in navigator)) {
+      info.textContent = 'Location services aren’t available on this device — tap the map to set it manually.';
+      return;
+    }
+    info.innerHTML = '<span class="locate-spinner"></span>Finding your location…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setNewDriverLocation(pos.coords.latitude, pos.coords.longitude);
+        newDriverMap.setView([pos.coords.latitude, pos.coords.longitude], 13);
+      },
+      (err) => {
+        info.textContent = `Couldn't get your location (${err.message}). Tap the map to set it manually.`;
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   }
 
   function onNewDriverRouteChange() {
@@ -144,6 +170,7 @@
     }
 
     sessionStorage.setItem('taxiDriverId', myDriverId);
+    Notify.requestPermission();
     enterDashboard();
   });
 
@@ -235,6 +262,7 @@
   // ---------- STEP 3: incoming request ----------
   let animCancel = null;
   let animatingForRequestId = null;
+  let lastNotifiedRequestId = null;
 
   function render() {
     const me = getMe();
@@ -257,6 +285,11 @@
     if (req.status === 'pending') {
       const stop = findStop(req.routeId, req.stopId);
       const secsLeft = Math.max(0, Math.ceil((req.expiresAt - Date.now()) / 1000));
+
+      if (lastNotifiedRequestId !== req.id) {
+        lastNotifiedRequestId = req.id;
+        Notify.fire('🚖 New pickup request', `${req.passengerName} wants a ride to ${stop.name}. 90s to respond.`, { kind: 'waiting', tag: req.id });
+      }
       card.innerHTML = `
         <h3>Pickup request from ${req.passengerName}</h3>
         <div class="meta">Pickup point: <strong>${stop.name}</strong> · Route: ${findRoute(req.routeId).name}</div>

@@ -27,8 +27,11 @@
       <h2>2. Your location, route &amp; nearest stop</h2>
       <span class="name-tag" id="welcome-tag"></span>
 
-      <label>2a. Tap the map to set your location</label>
-      <p class="field-hint" id="location-info">Defaulting to Johannesburg CBD — tap anywhere on the map below to move your pin.</p>
+      <label>2a. Your location</label>
+      <div class="locate-row">
+        <button class="secondary" id="btn-locate" type="button">📍 Use my location</button>
+        <p class="field-hint" id="location-info" style="margin:0">Tap "Use my location" to allow location access, or tap the map to set it manually.</p>
+      </div>
 
       <div id="map"></div>
 
@@ -75,6 +78,7 @@
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>
   <script src="js/map-utils.js"></script>
+  <script src="js/notify.js"></script>
   <script src="js/passenger.js"></script>
 </body>
 </html>
