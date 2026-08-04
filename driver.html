@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Driver Portal — Smart Taxi Demo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>🚕 Driver Portal</h1>
+    <a class="back-link" href="index.html">&larr; Back</a>
+  </div>
+
+  <div class="wrap">
+    <!-- STEP 1: login -->
+    <div class="panel" id="panel-login">
+      <h2>1. Log in</h2>
+
+      <div class="mode-toggle">
+        <label class="mode-option">
+          <input type="radio" name="login-mode" value="existing" id="mode-existing" checked />
+          <span>Play as an existing driver</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="login-mode" value="new" id="mode-new" />
+          <span>Register as a new driver</span>
+        </label>
+      </div>
+
+      <div id="existing-driver-form">
+        <label for="driver-select">Choose a driver</label>
+        <select id="driver-select"></select>
+        <p class="field-hint" id="existing-driver-info"></p>
+      </div>
+
+      <div id="new-driver-form" style="display:none">
+        <label for="new-driver-name">Your name</label>
+        <input type="text" id="new-driver-name" placeholder="e.g. Nadia" />
+
+        <label for="new-driver-route">1. Choose your destination / route</label>
+        <select id="new-driver-route">
+          <option value="">Choose a route…</option>
+        </select>
+        <p class="field-hint" id="new-driver-route-info">Pick a route to see its stops on the map.</p>
+
+        <label>2. Tap the map to set your current location</label>
+        <div id="new-driver-map" style="height:260px;border-radius:12px;border:1px solid var(--border)"></div>
+        <p class="field-hint" id="new-driver-location-info">No location set yet.</p>
+      </div>
+
+      <button id="btn-login" disabled>Continue</button>
+      <p class="field-hint" id="login-blocker"></p>
+    </div>
+
+    <!-- STEP 2: dashboard -->
+    <div class="panel" id="panel-dashboard" style="display:none">
+      <h2>2. Your dashboard</h2>
+      <span class="name-tag" id="driver-tag"></span>
+      <div style="margin-top:10px">
+        <span class="status-chip status-idle" id="online-chip">
+          <span class="status-dot"></span><span id="online-text">Offline</span>
+        </span>
+        <button id="btn-toggle-online" style="margin-left:10px">Go Online</button>
+      </div>
+
+      <label style="margin-top:16px">Your route &amp; stops</label>
+      <ul class="stop-list" id="driver-stop-list"></ul>
+
+      <div id="map"></div>
+    </div>
+
+    <!-- STEP 3: incoming request -->
+    <div class="panel" id="panel-request" style="display:none">
+      <h2>3. Incoming request</h2>
+      <div class="request-card" id="request-card"></div>
+    </div>
+
+    <div class="flag">
+      Demo note: this driver identity's status/location/route lives in this
+      browser's local storage, shared with the Passenger Portal tab. Refresh
+      resets nothing — use "Back" then the landing page's reset if you need a
+      clean slate.
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/map-utils.js"></script>
+  <script src="js/driver.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smart Taxi — Demo</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>🚖 Smart Taxi Tracking — Prototype</h1>
+    <span class="badge">Demo mode · mock data</span>
+  </div>
+
+  <div class="wrap">
+    <p style="max-width:600px;color:var(--muted)">
+      A working demo of a shared-taxi matching app: passengers request a pickup
+      on a route, the closest available driver gets 90 seconds to accept, and
+      you watch the match happen live on the map. All data is mocked and lives
+      only in this browser.
+    </p>
+
+    <div class="landing-grid">
+      <a class="portal-card" href="passenger.html">
+        <div class="icon">🧍</div>
+        <h2>Passenger Portal</h2>
+        <p>Pick a route &amp; stop, request a taxi, watch it arrive.</p>
+      </a>
+      <a class="portal-card" href="driver.html">
+        <div class="icon">🚕</div>
+        <h2>Driver Portal</h2>
+        <p>Go online, receive requests, accept or decline.</p>
+      </a>
+    </div>
+
+    <div class="hint-box">
+      <strong>For the best demo:</strong> open the Passenger Portal in one
+      window and the Driver Portal in another (side by side, or on two
+      devices/browsers). They sync live via the browser's local storage — no
+      server needed. Requests to any driver you're <em>not</em> actively
+      controlling will simply time out after 90s and auto-forward to the next
+      closest driver, which is a good way to show the "declined / timeout"
+      path without touching anything.
+    </div>
+  </div>
+</body>
+</html>

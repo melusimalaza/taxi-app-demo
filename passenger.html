@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Passenger Portal — Smart Taxi Demo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>🧍 Passenger Portal</h1>
+    <a class="back-link" href="index.html">&larr; Back</a>
+  </div>
+
+  <div class="wrap">
+    <!-- STEP 1: login -->
+    <div class="panel" id="panel-login">
+      <h2>1. Log in</h2>
+      <label for="passenger-name">Your name</label>
+      <input type="text" id="passenger-name" placeholder="e.g. Nadia" />
+      <button id="btn-login">Continue</button>
+    </div>
+
+    <!-- STEP 2: location + route + stop -->
+    <div class="panel" id="panel-setup" style="display:none">
+      <h2>2. Your location, route &amp; nearest stop</h2>
+      <span class="name-tag" id="welcome-tag"></span>
+
+      <label>2a. Tap the map to set your location</label>
+      <p class="field-hint" id="location-info">Defaulting to Johannesburg CBD — tap anywhere on the map below to move your pin.</p>
+
+      <div id="map"></div>
+
+      <label for="route-select">2b. Select your route / destination</label>
+      <select id="route-select">
+        <option value="">Choose a route…</option>
+      </select>
+      <p class="field-hint" id="route-info">Pick a route to see its stops and nearby taxis.</p>
+
+      <div id="stop-picker" style="display:none">
+        <label>2c. Pick your pickup stop (closest first)</label>
+        <ul class="stop-list" id="stop-list"></ul>
+      </div>
+
+      <div id="driver-preview" style="display:none">
+        <label>Available taxis on this route</label>
+        <ul class="driver-list" id="driver-list"></ul>
+      </div>
+
+      <button id="btn-request" disabled>Request Pickup</button>
+      <p class="field-hint" id="request-blocker"></p>
+    </div>
+
+    <!-- STEP 3: request status -->
+    <div class="panel" id="panel-status" style="display:none">
+      <h2>3. Request status</h2>
+      <div id="status-chip" class="status-chip status-idle">
+        <span class="status-dot"></span><span id="status-text">Idle</span>
+      </div>
+      <div id="status-detail" style="margin-top:14px"></div>
+      <button class="secondary" id="btn-reset" style="display:none">Start a new request</button>
+    </div>
+
+    <div class="flag" id="ambiguity-note">
+      Demo note: passenger and driver windows sync via this browser's local
+      storage, not a real backend. Requests sent to a driver you aren't
+      controlling in another window will simply run out the 90s timer and
+      auto-forward — that's expected, and demonstrates the timeout/forward
+      path.
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/map-utils.js"></script>
+  <script src="js/passenger.js"></script>
+</body>
+</html>
