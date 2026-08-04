@@ -14,6 +14,7 @@
 
   let selectedRouteId = null;
   let selectedStopId = null;
+  let stopExplicitlyChosen = false; // false = keep auto-picking nearest as location updates
   let passengerLocation = { ...JHB_CENTER };
 
   let activeRequestId = null; // request currently being tracked
@@ -30,6 +31,10 @@
     nameInput.value = passengerName;
   }
 
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') btnLogin.click();
+  });
+
   btnLogin.addEventListener('click', () => {
     const val = nameInput.value.trim();
     if (!val) {
@@ -44,9 +49,26 @@
     initMap();
     populateRoutes();
     refreshRequestBlocker();
-    Notify.requestPermission();
     requestGeolocation(true);
+    renderRouteAvailability();
+    subscribeStore(renderRouteAvailability);
+    setInterval(renderRouteAvailability, 2000);
   });
+
+  // ---------- Live "who's online where" preview ----------
+  function renderRouteAvailability() {
+    const list = document.getElementById('route-availability-list');
+    if (!list) return;
+    const state = loadState();
+    list.innerHTML = '';
+    MOCK_ROUTES.forEach((r) => {
+      const onlineCount = state.drivers.filter((d) => d.routeId === r.id && d.status === 'online').length;
+      const li = document.createElement('li');
+      li.style.cursor = 'default';
+      li.innerHTML = `<span>${r.name}</span><span class="dist">${onlineCount ? `🟢 ${onlineCount} online` : '⚪ none online'}</span>`;
+      list.appendChild(li);
+    });
+  }
 
   // ---------- Geolocation ----------
   function requestGeolocation(silent) {
@@ -121,6 +143,7 @@
     sel.addEventListener('change', () => {
       selectedRouteId = sel.value || null;
       selectedStopId = null;
+      stopExplicitlyChosen = false;
       const routeInfo = document.getElementById('route-info');
       if (!selectedRouteId) {
         document.getElementById('stop-picker').style.display = 'none';
@@ -160,14 +183,17 @@
     const sorted = [...route.stops].sort(
       (a, b) => distanceKm(passengerLocation, a) - distanceKm(passengerLocation, b)
     );
+    if (!stopExplicitlyChosen && sorted.length) selectedStopId = sorted[0].id;
+
     sorted.forEach((stop, i) => {
       const li = document.createElement('li');
       const km = distanceKm(passengerLocation, stop).toFixed(1);
-      li.innerHTML = `<span>${stop.name}</span><span class="dist">${km} km</span>`;
-      if (i === 0 && !selectedStopId) selectedStopId = stop.id;
+      const autoTag = i === 0 && !stopExplicitlyChosen ? ' <span class="dist">(closest)</span>' : '';
+      li.innerHTML = `<span>${stop.name}${autoTag}</span><span class="dist">${km} km</span>`;
       if (stop.id === selectedStopId) li.classList.add('selected');
       li.addEventListener('click', () => {
         selectedStopId = stop.id;
+        stopExplicitlyChosen = true;
         renderStopList();
         renderPickupMarker();
       });
@@ -219,8 +245,20 @@
   }
 
   document.getElementById('btn-request').addEventListener('click', sendRequest);
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    document.getElementById('btn-retry').style.display = 'none';
+    sendRequest();
+  });
+
+  let noDriversRetryHandle = null;
 
   function sendRequest() {
+    if (noDriversRetryHandle) { clearInterval(noDriversRetryHandle); noDriversRetryHandle = null; }
+    if (!Notify.permissionAsked) {
+      Notify.permissionAsked = true;
+      Notify.requestPermission();
+    }
+
     const state = loadState();
     const stop = findStop(selectedRouteId, selectedStopId);
     const driver = findClosestDriver(state, selectedRouteId, passengerLocation, []);
@@ -253,9 +291,23 @@
   function renderNoDrivers() {
     setStatusChip('declined', 'No drivers available');
     document.getElementById('status-detail').innerHTML =
-      '<p>No online drivers on this route right now. Try again once a driver goes online.</p>';
+      '<p>No online drivers on this route right now. We\'ll keep checking automatically — or tap Retry.</p>';
+    document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('btn-retry').style.display = 'inline-block';
     document.getElementById('btn-reset').style.display = 'inline-block';
     Notify.fire('🚫 No drivers available', 'No online drivers on this route right now.', { kind: 'declined', sound: false });
+
+    if (noDriversRetryHandle) clearInterval(noDriversRetryHandle);
+    noDriversRetryHandle = setInterval(() => {
+      const state = loadState();
+      const driver = findClosestDriver(state, selectedRouteId, passengerLocation, []);
+      if (driver) {
+        clearInterval(noDriversRetryHandle);
+        noDriversRetryHandle = null;
+        document.getElementById('btn-retry').style.display = 'none';
+        sendRequest();
+      }
+    }, 3000);
   }
 
   // ---------- STEP 3: status / polling / forwarding ----------
@@ -284,6 +336,16 @@
     if (!req) return;
     const now = Date.now();
 
+    if (req.status === 'cancelled') {
+      if (pollHandle) { clearInterval(pollHandle); pollHandle = null; }
+      setStatusChip('idle', 'Request cancelled');
+      document.getElementById('status-detail').innerHTML = '<p>You cancelled this request.</p>';
+      document.getElementById('btn-cancel').style.display = 'none';
+      document.getElementById('btn-retry').style.display = 'none';
+      document.getElementById('btn-reset').style.display = 'inline-block';
+      return;
+    }
+
     if (req.status === 'accepted') {
       renderAccepted(req);
       return;
@@ -302,7 +364,20 @@
       <p>Waiting for <strong>${driver ? driver.name : 'driver'}</strong> to respond.</p>
       <p class="timer-ring">${secsLeft}s remaining</p>
     `;
+    document.getElementById('btn-cancel').style.display = 'inline-block';
+    document.getElementById('btn-retry').style.display = 'none';
   }
+
+  document.getElementById('btn-cancel').addEventListener('click', () => {
+    const req = getMyLatestRequest();
+    if (!req || req.status !== 'pending') return;
+    updateState((s) => {
+      const stored = s.requests.find((r) => r.id === req.id);
+      if (stored && stored.status === 'pending') stored.status = 'cancelled';
+    });
+    document.getElementById('btn-cancel').style.display = 'none';
+    tick();
+  });
 
   function handleDeclineOrTimeout(req) {
     if (handledExpiryFor.has(req.id)) return;
@@ -316,6 +391,7 @@
 
     setStatusChip('declined', 'Declined — finding next match…');
     document.getElementById('status-detail').innerHTML = '<p>Looking for the next closest available driver…</p>';
+    document.getElementById('btn-cancel').style.display = 'none';
     Notify.fire('⏱️ Declined / timed out', 'Finding the next closest available driver…', { kind: 'declined' });
 
     setTimeout(() => {
@@ -358,6 +434,8 @@
       <strong>${stop.name}</strong>.</p>
       <p class="eta">Estimated arrival: ~${etaMin} min</p>
     `;
+    document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('btn-retry').style.display = 'none';
     document.getElementById('btn-reset').style.display = 'inline-block';
 
     if (animatingForRequestId === req.id) return; // already animating
@@ -390,6 +468,24 @@
   }
 
   document.getElementById('btn-reset').addEventListener('click', () => {
-    window.location.reload();
+    if (pollHandle) { clearInterval(pollHandle); pollHandle = null; }
+    if (noDriversRetryHandle) { clearInterval(noDriversRetryHandle); noDriversRetryHandle = null; }
+    if (animCancel) { animCancel(); animCancel = null; }
+    animatingForRequestId = null;
+    handledExpiryFor = new Set();
+    selectedStopId = null;
+    stopExplicitlyChosen = false;
+
+    document.getElementById('panel-status').style.display = 'none';
+    document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('btn-retry').style.display = 'none';
+    document.getElementById('btn-reset').style.display = 'none';
+    document.getElementById('status-detail').innerHTML = '';
+    setStatusChip('idle', 'Idle');
+    document.getElementById('btn-request').disabled = false;
+
+    if (selectedRouteId) { renderStopList(); renderDriverPreview(); }
+    refreshRequestBlocker();
+    document.getElementById('panel-setup').scrollIntoView({ behavior: 'smooth' });
   });
 })();

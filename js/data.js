@@ -1,6 +1,11 @@
 // Mock data: routes, stops, drivers. Johannesburg-flavoured coordinates (approximate).
 // Loaded as a plain script (no modules) so it works from file:// with no server.
 
+// Bump this whenever routes/drivers shape changes — store.js uses it to
+// throw away stale localStorage from a previous version instead of silently
+// matching passengers against routes that no longer exist.
+const DATA_VERSION = 2;
+
 // All routes are centred on Auckland Park and its immediate surrounding
 // suburbs (Melville, Milpark, Brixton, Braamfontein, Westdene, Emmarentia,
 // Greenside, Rosebank, Randburg, Cresta) — kept deliberately local/walkable

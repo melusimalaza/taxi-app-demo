@@ -81,14 +81,17 @@
     </div>
 
     <div class="flag">
-      Demo note: this driver identity's status/location/route lives in this
-      browser's local storage, shared with the Passenger Portal tab. Refresh
-      resets nothing — use "Back" then the landing page's reset if you need a
-      clean slate.
+      Demo note: this driver identity syncs live over the internet with
+      whoever is on the Passenger Portal, on any device. Refresh resets
+      nothing for you specifically — go "Go Offline" first if you want to
+      step away.
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>
   <script src="js/map-utils.js"></script>

@@ -31,6 +31,10 @@
   driverSelect.addEventListener('change', () => { updateExistingDriverInfo(); refreshLoginBlocker(); });
   updateExistingDriverInfo();
 
+  document.getElementById('new-driver-name').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-login').click();
+  });
+
   const modeExisting = document.getElementById('mode-existing');
   const modeNew = document.getElementById('mode-new');
   function applyLoginMode() {
@@ -170,7 +174,6 @@
     }
 
     sessionStorage.setItem('taxiDriverId', myDriverId);
-    Notify.requestPermission();
     enterDashboard();
   });
 
@@ -252,10 +255,12 @@
   }
 
   document.getElementById('btn-toggle-online').addEventListener('click', () => {
+    const goingOnline = getMe().status === 'offline';
     updateState((s) => {
       const me = s.drivers.find((d) => d.id === myDriverId);
       me.status = me.status === 'offline' ? 'online' : 'offline';
     });
+    if (goingOnline) Notify.requestPermission(); // ask right when it matters: about to start receiving requests
     render();
   });
 
