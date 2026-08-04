@@ -1,29 +1,12 @@
 // Mock data: routes, stops, drivers. Johannesburg-flavoured coordinates (approximate).
 // Loaded as a plain script (no modules) so it works from file:// with no server.
 
+// All routes are centred on Auckland Park and its immediate surrounding
+// suburbs (Melville, Milpark, Brixton, Braamfontein, Westdene, Emmarentia,
+// Greenside, Rosebank, Randburg, Cresta) — kept deliberately local/walkable
+// distances apart so the demo map stays tight and legible. APAX School is
+// first in the list since it's the anchor for this assignment.
 const MOCK_ROUTES = [
-  {
-    id: 'route-bree-baragwanath',
-    name: 'Bree St ↔ Baragwanath (Soweto)',
-    stops: [
-      { id: 'stop-bree', name: 'Bree Street Taxi Rank', lat: -26.2023, lng: 28.0436 },
-      { id: 'stop-nasrec', name: 'Nasrec', lat: -26.2385, lng: 27.9836 },
-      { id: 'stop-baragwanath', name: 'Baragwanath', lat: -26.2519, lng: 27.9364 },
-      { id: 'stop-orlando', name: 'Orlando', lat: -26.2635, lng: 27.9219 },
-      { id: 'stop-dobsonville', name: 'Dobsonville', lat: -26.2544, lng: 27.8618 },
-    ],
-  },
-  {
-    id: 'route-park-sandton',
-    name: 'Park Station ↔ Alexandra ↔ Sandton',
-    stops: [
-      { id: 'stop-park', name: 'Park Station', lat: -26.1919, lng: 28.0423 },
-      { id: 'stop-wynberg', name: 'Wynberg', lat: -26.1058, lng: 28.0827 },
-      { id: 'stop-marlboro', name: 'Marlboro', lat: -26.0891, lng: 28.1042 },
-      { id: 'stop-alexandra', name: 'Alexandra', lat: -26.1030, lng: 28.0940 },
-      { id: 'stop-sandton', name: 'Sandton', lat: -26.1076, lng: 28.0567 },
-    ],
-  },
   {
     id: 'route-apax-randburg',
     name: 'APAX School (Auckland Park) ↔ Melville ↔ Randburg',
@@ -35,35 +18,57 @@ const MOCK_ROUTES = [
       { id: 'stop-cresta', name: 'Cresta', lat: -26.1177, lng: 27.9744 },
     ],
   },
+  {
+    id: 'route-milpark-braamfontein',
+    name: 'Auckland Park ↔ Milpark ↔ Brixton ↔ Braamfontein',
+    stops: [
+      { id: 'stop-auckland-park-2', name: 'Auckland Park', lat: -26.1848, lng: 28.0088 },
+      { id: 'stop-milpark', name: 'Milpark', lat: -26.1790, lng: 28.0180 },
+      { id: 'stop-brixton', name: 'Brixton', lat: -26.1740, lng: 28.0230 },
+      { id: 'stop-braamfontein', name: 'Braamfontein', lat: -26.1925, lng: 28.0356 },
+      { id: 'stop-parktown', name: 'Parktown', lat: -26.1830, lng: 28.0430 },
+    ],
+  },
+  {
+    id: 'route-emmarentia-rosebank',
+    name: 'Auckland Park ↔ Emmarentia ↔ Greenside ↔ Rosebank',
+    stops: [
+      { id: 'stop-auckland-park-3', name: 'Auckland Park', lat: -26.1848, lng: 28.0088 },
+      { id: 'stop-westdene', name: 'Westdene', lat: -26.1740, lng: 27.9970 },
+      { id: 'stop-emmarentia', name: 'Emmarentia', lat: -26.1620, lng: 28.0000 },
+      { id: 'stop-greenside', name: 'Greenside', lat: -26.1560, lng: 28.0210 },
+      { id: 'stop-rosebank', name: 'Rosebank', lat: -26.1467, lng: 28.0436 },
+    ],
+  },
 ];
 
 const MOCK_DRIVERS = [
   {
     id: 'driver-thabo',
     name: 'Thabo Nkosi',
-    routeId: 'route-bree-baragwanath',
-    currentLocation: { lat: -26.2200, lng: 28.0100 },
+    routeId: 'route-apax-randburg',
+    currentLocation: { lat: -26.1800, lng: 28.0070 },
     status: 'online',
   },
   {
     id: 'driver-sipho',
     name: 'Sipho Dlamini',
-    routeId: 'route-bree-baragwanath',
-    currentLocation: { lat: -26.2600, lng: 27.9300 },
+    routeId: 'route-apax-randburg',
+    currentLocation: { lat: -26.1050, lng: 27.9850 },
     status: 'online',
   },
   {
     id: 'driver-lerato',
     name: 'Lerato Mokoena',
-    routeId: 'route-park-sandton',
-    currentLocation: { lat: -26.1050, lng: 28.0850 },
+    routeId: 'route-milpark-braamfontein',
+    currentLocation: { lat: -26.1800, lng: 28.0200 },
     status: 'online',
   },
   {
     id: 'driver-zanele',
     name: 'Zanele Khumalo',
-    routeId: 'route-apax-randburg',
-    currentLocation: { lat: -26.1830, lng: 28.0050 },
+    routeId: 'route-emmarentia-rosebank',
+    currentLocation: { lat: -26.1700, lng: 28.0050 },
     status: 'online',
   },
 ];

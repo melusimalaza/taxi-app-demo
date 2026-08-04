@@ -56,8 +56,10 @@ double-click also works in most browsers, but a local server avoids any
 - **Passenger and Driver are separate pages/tabs**, not a single shared
   screen, synced via `localStorage`. Chosen because it's more demo-realistic
   (two people, two "devices") than a single-screen mode switcher.
-- **Johannesburg-flavoured mock coordinates** (Bree St, Park Station, Noord
-  St ranks) — not real-world accurate, just plausible for local flavor.
+- **All routes are centred on Auckland Park and its surrounding suburbs**
+  (Melville, Milpark, Brixton, Braamfontein, Westdene, Emmarentia, Greenside,
+  Rosebank, Randburg, Cresta), with the **APAX School route listed first** —
+  ties the demo to the school. Coordinates are plausible, not survey-accurate.
 - **Driver login** offers a quick "play as an existing mock driver" path
   (recommended for the live demo — location/route already set) plus a
   "register as a new driver" path that lets you click the map to set a
